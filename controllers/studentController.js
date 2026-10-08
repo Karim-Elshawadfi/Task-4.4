@@ -1,11 +1,23 @@
 // Req 6: list all students + workflow status
 // Req 7: search by student ID, full name or GUC email
+// Req 8: filter by type, advisor, major, semester, standing, status, blocking step, account status
 //
 // Reads `student_profiles` joined with `users` (Sprint 1 unified schema) and
 // `workflow_actions` (Req 6-9) for the last-update time.
+const User = require('../models/User');
 const StudentProfile = require('../models/StudentProfile');
-const { BLOCKING_STEP, defaultStatus } = require('../services/workflowStatus');
+const { STUDENT_TYPES } = StudentProfile;
+const { ACCOUNT_STATUSES } = User;
+const {
+  NORMAL_STATUSES,
+  ADVISING_STATUSES,
+  BLOCKING_STEPS,
+  BLOCKING_STEP,
+  statusesBlockedOn,
+  defaultStatus,
+} = require('../services/workflowStatus');
 
+const UUID_RX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SORTABLE = {
   name: 'user.full_name',
   studentId: 'guc_student_id',
@@ -83,6 +95,23 @@ function buildStudentQuery(q = {}) {
     });
   }
 
+  // ---- Req 8: filters ----
+  const studentType = String(q.studentType || '').toUpperCase();
+  if (STUDENT_TYPES.includes(studentType)) and.push({ student_type: studentType });
+  if (q.advisor) {
+    if (q.advisor === 'none') and.push({ assigned_advisor_id: null });
+    else if (UUID_RX.test(q.advisor)) and.push({ assigned_advisor_id: q.advisor });
+  }
+  if (q.major) and.push({ major: q.major });
+  if (q.semester && !Number.isNaN(Number(q.semester))) {
+    and.push({ current_semester: Number(q.semester) });
+  }
+  if (q.standing) and.push({ academic_standing: q.standing });
+  if (q.status) and.push({ workflow_status: q.status });
+  if (q.blockingStep) and.push({ workflow_status: { $in: statusesBlockedOn(q.blockingStep) } });
+  const accountStatus = String(q.accountStatus || '').toUpperCase();
+  if (ACCOUNT_STATUSES.includes(accountStatus)) and.push({ 'user.account_status': accountStatus });
+
   return and.length === 1 ? and[0] : { $and: and };
 }
 
@@ -112,7 +141,7 @@ function toListItem(p) {
   };
 }
 
-// GET /api/students?search=&sort=&page=&limit=
+// GET /api/students?search=&studentType=&advisor=&major=&semester=&standing=&status=&blockingStep=&accountStatus=&sort=&page=&limit=
 async function listStudents(req, res, next) {
   try {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -144,8 +173,40 @@ async function listStudents(req, res, next) {
   }
 }
 
+// GET /api/students/filter-options  -> values for the filter dropdowns (Req 8)
+async function getFilterOptions(req, res, next) {
+  try {
+    const [advisors, majors, semesters, standings] = await Promise.all([
+      User.find({ role: 'ADVISOR' }).select('full_name guc_email').sort('full_name').lean(),
+      StudentProfile.distinct('major'),
+      StudentProfile.distinct('current_semester'),
+      StudentProfile.distinct('academic_standing'),
+    ]);
+    const present = (values) => values.filter((v) => v != null && v !== '');
+    res.json({
+      studentTypes: [
+        { value: 'NORMAL', label: 'Normal Student' },
+        { value: 'ADVISING', label: 'Advising Student' },
+      ],
+      advisors: advisors.map((a) => ({ value: a._id, label: a.full_name, email: a.guc_email })),
+      majors: present(majors).sort(),
+      semesters: present(semesters).sort((a, b) => a - b),
+      standings: present(standings).sort(),
+      statuses: { NORMAL: NORMAL_STATUSES, ADVISING: ADVISING_STATUSES },
+      blockingSteps: BLOCKING_STEPS,
+      accountStatuses: [
+        { value: 'ACTIVE', label: 'Active' },
+        { value: 'DEACTIVATED', label: 'Deactivated' },
+      ],
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listStudents,
+  getFilterOptions,
   buildStudentQuery,
   buildSort,
   escapeRegex,

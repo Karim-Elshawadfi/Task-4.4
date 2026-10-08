@@ -1,10 +1,11 @@
 // Run: node --test tests/
 const test = require('node:test');
 const assert = require('node:assert');
-const { computeWorkflow } = require('../services/workflowStatus');
+const { computeWorkflow, statusesBlockedOn } = require('../services/workflowStatus');
 const { buildStudentQuery, buildSort, escapeRegex } = require('../controllers/studentController');
 
 const t = (h) => new Date(2026, 9, 1, h);
+const ADVISOR_ID = '3f2b8c1e-9a4d-4e6f-8b2a-1c5d7e9f0a12';
 
 test('advising student with no actions is Not Started, blocked on advisor', () => {
   const w = computeWorkflow('ADVISING', [], t(0));
@@ -56,6 +57,41 @@ test('search input is escaped (no regex injection / crash)', () => {
   assert.equal(escapeRegex('a.b*'), 'a\\.b\\*');
   const rx = buildStudentQuery({ search: 'a.b' }).$and[1].$or[1]['user.full_name'];
   assert.ok(!rx.test('axb'));
+});
+
+test('all eight filters are applied', () => {
+  const q = buildStudentQuery({
+    studentType: 'advising',
+    advisor: ADVISOR_ID,
+    major: 'CS',
+    semester: '5',
+    standing: 'Probation',
+    status: 'Draft',
+    blockingStep: 'Student review',
+    accountStatus: 'deactivated',
+  });
+  const [, type, advisor, major, semester, standing, status, blocking, account] = q.$and;
+  assert.equal(type.student_type, 'ADVISING');
+  assert.equal(advisor.assigned_advisor_id, ADVISOR_ID);
+  assert.equal(major.major, 'CS');
+  assert.equal(semester.current_semester, 5);
+  assert.equal(standing.academic_standing, 'Probation');
+  assert.equal(status.workflow_status, 'Draft');
+  assert.deepEqual(blocking.workflow_status, { $in: ['Ready for Student Review'] });
+  assert.equal(account['user.account_status'], 'DEACTIVATED');
+});
+
+test('blocking step maps to every status waiting on it', () => {
+  assert.deepEqual(statusesBlockedOn('None').sort(), [
+    'Processed', 'Schedule Assigned', 'Swap Completed', 'Swap Expired', 'Swap Withdrawn',
+  ]);
+});
+
+test('advisor=none finds students without an advisor; bad values are ignored', () => {
+  assert.equal(buildStudentQuery({ advisor: 'none' }).$and[1].assigned_advisor_id, null);
+  assert.equal(buildStudentQuery({ advisor: 'garbage' }).$and, undefined);
+  assert.equal(buildStudentQuery({ studentType: 'hacker' }).$and, undefined);
+  assert.equal(buildStudentQuery({ accountStatus: 'hacker' }).$and, undefined);
 });
 
 test('sort defaults to most recently updated and whitelists fields', () => {

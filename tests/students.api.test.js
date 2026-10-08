@@ -70,3 +70,22 @@ test('search hits users.full_name, users.guc_email and guc_student_id', async ()
   assert.equal((await list('?search=laila.m')).body.students[0].id, laila._id);
   assert.deepEqual((await list('?search=52-')).body.students.map((s) => s.id).sort(), [omar._id, nour._id].sort());
 });
+
+test('filters, including derived blocking step and pagination', async () => {
+  assert.equal((await list('?studentType=NORMAL')).body.total, 1);
+  assert.equal((await list(`?advisor=${advisor._id}&semester=5`)).body.students[0].id, omar._id);
+  assert.equal((await list('?advisor=none')).body.students[0].id, laila._id);
+  assert.equal((await list('?accountStatus=DEACTIVATED')).body.students[0].id, nour._id);
+  assert.equal((await list('?blockingStep=Advisor%20drafting%20schedule')).body.students[0].id, omar._id);
+  assert.equal((await list('?status=Not%20Started')).body.total, 1);
+  const page2 = (await list('?sort=name&limit=2&page=2')).body;
+  assert.deepEqual([page2.total, page2.totalPages, page2.students[0].fullName], [3, 2, 'Omar Khaled']);
+});
+
+test('filter options come from the data', async () => {
+  const { body } = await request(app).get('/api/students/filter-options').set(auth(coordinator)).expect(200);
+  assert.deepEqual(body.advisors, [{ value: advisor._id, label: 'Amr Hassan', email: 'amr.hassan@guc.edu.eg' }]);
+  assert.deepEqual(body.majors, ['CS', 'DMET']);
+  assert.deepEqual(body.semesters, [3, 5]);
+  assert.deepEqual(body.standings, ['Probation']);
+});
