@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const { computeWorkflow } = require('../services/workflowStatus');
-const { buildStudentQuery, buildSort } = require('../controllers/studentController');
+const { buildStudentQuery, buildSort, escapeRegex } = require('../controllers/studentController');
 
 const t = (h) => new Date(2026, 9, 1, h);
 
@@ -40,6 +40,22 @@ test('processed is not blocked', () => {
 
 test('no params -> only students', () => {
   assert.deepEqual(buildStudentQuery({}), { 'user.role': 'STUDENT' });
+});
+
+test('search matches guc_student_id prefix, name and email, case-insensitive', () => {
+  const q = buildStudentQuery({ search: ' 52-10 ' });
+  const or = q.$and[1].$or;
+  assert.ok(or[0].guc_student_id.test('52-1001'));
+  assert.ok(!or[0].guc_student_id.test('152-10'));
+  assert.ok(buildStudentQuery({ search: 'omar' }).$and[1].$or[1]['user.full_name'].test('Omar Khaled'));
+  assert.ok(buildStudentQuery({ search: 'OMAR.K' }).$and[1].$or[2]['user.guc_email'].test('omar.khaled@student.guc.edu.eg'));
+});
+
+test('search input is escaped (no regex injection / crash)', () => {
+  assert.doesNotThrow(() => buildStudentQuery({ search: '(*[' }));
+  assert.equal(escapeRegex('a.b*'), 'a\\.b\\*');
+  const rx = buildStudentQuery({ search: 'a.b' }).$and[1].$or[1]['user.full_name'];
+  assert.ok(!rx.test('axb'));
 });
 
 test('sort defaults to most recently updated and whitelists fields', () => {

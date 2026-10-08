@@ -1,4 +1,5 @@
 // Req 6: list all students + workflow status
+// Req 7: search by student ID, full name or GUC email
 //
 // Reads `student_profiles` joined with `users` (Sprint 1 unified schema) and
 // `workflow_actions` (Req 6-9) for the last-update time.
@@ -11,6 +12,8 @@ const SORTABLE = {
   semester: 'current_semester',
   updated: 'last_updated',
 };
+
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // ---- Aggregation stages used by the list endpoint ----
 const WITH_USER = [
@@ -67,6 +70,19 @@ const WITH_ADVISOR = [
 function buildStudentQuery(q = {}) {
   const and = [{ 'user.role': 'STUDENT' }];
 
+  // ---- Req 7: search ----
+  const search = String(q.search || '').trim();
+  if (search) {
+    const rx = new RegExp(escapeRegex(search), 'i');
+    and.push({
+      $or: [
+        { guc_student_id: new RegExp('^' + escapeRegex(search), 'i') },
+        { 'user.full_name': rx },
+        { 'user.guc_email': rx },
+      ],
+    });
+  }
+
   return and.length === 1 ? and[0] : { $and: and };
 }
 
@@ -96,7 +112,7 @@ function toListItem(p) {
   };
 }
 
-// GET /api/students?sort=&page=&limit=
+// GET /api/students?search=&sort=&page=&limit=
 async function listStudents(req, res, next) {
   try {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -132,4 +148,5 @@ module.exports = {
   listStudents,
   buildStudentQuery,
   buildSort,
+  escapeRegex,
 };

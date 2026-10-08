@@ -7,7 +7,7 @@ const router = express.Router();
 // Only Coordinators and Administrators can use Req 6-9.
 router.use(protect, requireRole('COORDINATOR', 'ADMIN'));
 
-router.get('/', listStudents); //                  Req 6
+router.get('/', listStudents); //                  Req 6, 7
 
 module.exports = router;
 

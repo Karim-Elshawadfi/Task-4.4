@@ -64,3 +64,9 @@ test('lists only students, newest update first, with derived status and blocking
   assert.equal(lailaRow.workflowStatus, 'Schedule Assigned');
   assert.equal(lailaRow.assignedAdvisor, null);
 });
+
+test('search hits users.full_name, users.guc_email and guc_student_id', async () => {
+  assert.equal((await list('?search=khaled')).body.students[0].id, omar._id);
+  assert.equal((await list('?search=laila.m')).body.students[0].id, laila._id);
+  assert.deepEqual((await list('?search=52-')).body.students.map((s) => s.id).sort(), [omar._id, nour._id].sort());
+});
