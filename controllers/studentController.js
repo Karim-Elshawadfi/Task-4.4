@@ -1,11 +1,13 @@
 // Req 6: list all students + workflow status
 // Req 7: search by student ID, full name or GUC email
 // Req 8: filter by type, advisor, major, semester, standing, status, blocking step, account status
+// Req 9: open a selected student's details
 //
 // Reads `student_profiles` joined with `users` (Sprint 1 unified schema) and
 // `workflow_actions` (Req 6-9) for the last-update time.
 const User = require('../models/User');
 const StudentProfile = require('../models/StudentProfile');
+const WorkflowAction = require('../models/WorkflowAction');
 const { STUDENT_TYPES } = StudentProfile;
 const { ACCOUNT_STATUSES } = User;
 const {
@@ -27,7 +29,7 @@ const SORTABLE = {
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// ---- Aggregation stages used by the list endpoint ----
+// ---- Aggregation stages shared by the list and details endpoints ----
 const WITH_USER = [
   {
     $lookup: {
@@ -204,9 +206,48 @@ async function getFilterOptions(req, res, next) {
   }
 }
 
+// GET /api/students/:id  (Req 9) — :id is student_profiles.student_id (= users.user_id)
+async function getStudentDetails(req, res, next) {
+  try {
+    const { id } = req.params;
+    if (!UUID_RX.test(id)) return res.status(400).json({ message: 'Invalid student id' });
+
+    const [student] = await StudentProfile.aggregate([
+      { $match: { _id: id } },
+      ...WITH_USER,
+      { $match: { 'user.role': 'STUDENT' } },
+      ...WITH_LAST_UPDATED,
+      ...WITH_ADVISOR,
+    ]);
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    const history = await WorkflowAction.find({ student_id: id })
+      .sort({ created_at: -1 })
+      .limit(50)
+      .populate('performed_by', 'full_name role')
+      .lean();
+
+    res.json({
+      student: { ...toListItem(student), createdAt: student.user.created_at },
+      history: history.map((h) => ({
+        id: h._id,
+        type: h.action_type,
+        note: h.note,
+        at: h.created_at,
+        performedBy: h.performed_by
+          ? { fullName: h.performed_by.full_name, role: h.performed_by.role }
+          : null,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listStudents,
   getFilterOptions,
+  getStudentDetails,
   buildStudentQuery,
   buildSort,
   escapeRegex,

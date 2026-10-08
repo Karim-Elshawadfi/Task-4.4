@@ -3,6 +3,7 @@ const { protect, requireRole } = require('../middleware/auth');
 const {
   listStudents,
   getFilterOptions,
+  getStudentDetails,
 } = require('../controllers/studentController');
 
 const router = express.Router();
@@ -12,6 +13,7 @@ router.use(protect, requireRole('COORDINATOR', 'ADMIN'));
 
 router.get('/', listStudents); //                  Req 6, 7, 8
 router.get('/filter-options', getFilterOptions); // Req 8 dropdown values
+router.get('/:id', getStudentDetails); //           Req 9
 
 module.exports = router;
 

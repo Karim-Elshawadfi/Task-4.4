@@ -9,6 +9,7 @@ const request = require('supertest');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const User = require('../models/User');
 const StudentProfile = require('../models/StudentProfile');
+const WorkflowAction = require('../models/WorkflowAction');
 const { recordWorkflowAction } = require('../services/workflowStatus');
 
 process.env.JWT_SECRET = 'test-secret';
@@ -88,4 +89,15 @@ test('filter options come from the data', async () => {
   assert.deepEqual(body.majors, ['CS', 'DMET']);
   assert.deepEqual(body.semesters, [3, 5]);
   assert.deepEqual(body.standings, ['Probation']);
+});
+
+test('details include workflow history; non-students and bad ids are rejected', async () => {
+  const { body } = await request(app).get(`/api/students/${nour._id}`).set(auth(coordinator)).expect(200);
+  assert.equal(body.student.studentId, '52-1002');
+  assert.deepEqual(body.history.map((h) => h.type), ['SENT_FOR_STUDENT_REVIEW', 'DRAFT_CREATED']);
+  assert.deepEqual(body.history[0].performedBy, { fullName: 'Amr Hassan', role: 'ADVISOR' });
+  assert.equal(await WorkflowAction.countDocuments({ student_id: nour._id }), 2);
+
+  await request(app).get(`/api/students/${advisor._id}`).set(auth(coordinator)).expect(404);
+  await request(app).get('/api/students/not-a-uuid').set(auth(coordinator)).expect(400);
 });
