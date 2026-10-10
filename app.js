@@ -24,6 +24,7 @@ function createApp({ secret = process.env.JWT_SECRET, origin = process.env.APP_O
     }
     next();
   }, createAuthRoutes());
+  app.use('/api/students', require('./routes/studentRoutes'));
   app.use(express.static(path.join(__dirname, 'public')));
   app.use((error, req, res, next) => {
     if (error.type === 'entity.parse.failed') return res.status(400).json({ message: 'Invalid JSON.' });

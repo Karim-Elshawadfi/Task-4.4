@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --env-file-if-exists=.env --watch server.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "seed": "node --env-file-if-exists=.env seed/seedStudents.js"
   },
   "engines": {
     "node": ">=22"
@@ -22,5 +23,8 @@
   "devDependencies": {
     "mongodb-memory-server": "^11.3.0",
     "supertest": "^7.3.1"
+  },
+  "allowScripts": {
+    "mongodb-memory-server@11.3.0": true
   }
 }
