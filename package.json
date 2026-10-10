@@ -6,7 +6,12 @@
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --env-file-if-exists=.env --watch server.js",
     "test": "node --test tests/*.test.js",
-    "seed": "node --env-file-if-exists=.env seed/seedStudents.js"
+    "seed": "node --env-file-if-exists=.env seed/seedStudents.js",
+    "mongo": "node scripts/devMongo.js",
+    "seed:catalogue": "node --env-file-if-exists=.env seed/seedCatalogue.js",
+    "test:catalogue": "node --test tests/catalogue.unit.test.js tests/catalogue.api.test.js",
+    "smoke:catalogue": "node --env-file-if-exists=.env scripts/smokeCatalogue.js",
+    "setup:env": "node scripts/makeEnv.js"
   },
   "engines": {
     "node": ">=22"
@@ -21,6 +26,7 @@
     "nodemailer": "^10.0.16"
   },
   "devDependencies": {
+    "mingo": "^7.2.4",
     "mongodb-memory-server": "^11.3.0",
     "supertest": "^7.3.1"
   },

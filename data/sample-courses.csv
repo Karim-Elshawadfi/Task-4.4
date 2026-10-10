@@ -1,0 +1,5 @@
+course_code,course_name,credit_hours,course_type,faculty/major,recommended_semester,offering_season,prerequisites
+CSEN 1067,Deep Learning,4,elective,CS;DMET,9,both,CSEN 1061
+CSEN 1068,Distributed Systems,4,elective,CS,10,spring,CSEN 602;CSEN 503
+DMET 1065,Interactive Storytelling,4,elective,DMET,9,winter,DMET 502
+CSEN 1061,Machine Learning,4,elective,CS;DMET,9,both,CSEN 301;MATH 401

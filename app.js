@@ -13,6 +13,10 @@ function createApp({ secret = process.env.JWT_SECRET, origin = process.env.APP_O
   app.locals.auth = { secret, origin: allowedOrigin, production, sendResetEmail };
   app.use(helmet({ strictTransportSecurity: production ? undefined : false,
     contentSecurityPolicy: { directives: { 'upgrade-insecure-requests': production ? [] : null } } }));
+  // Person 5 (Req 16-21, 128): academic terms and course catalogue. Mounted before the 8kb JSON
+  // parser so a catalogue CSV import (sent as JSON text) can be up to 2 MB.
+  app.use('/api/terms', express.json({ limit: '100kb' }), require('./routes/termRoutes'));
+  app.use('/api/catalogue', express.json({ limit: '2mb' }), require('./routes/catalogueRoutes'));
   app.use(express.json({ limit: '8kb' }));
   app.use('/api/auth', (req, res, next) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') {

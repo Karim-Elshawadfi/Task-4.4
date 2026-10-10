@@ -1,0 +1,5 @@
+course_code,course_name,credit_hours,course_type,faculty/major,recommended_semester,offering_season,prerequisites
+CSEN 1067,Deep Learning,four,elective,CS;DMET,9,both,CSEN 1061
+CSEN 1068,Distributed Systems,4,lab,CS,10,spring,CSEN 999
+DMET 1065,,4,elective,EE,12,fall,
+CSEN 1067,Deep Learning again,4,elective,CS,9,both,
