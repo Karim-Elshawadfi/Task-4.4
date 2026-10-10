@@ -1,0 +1,34 @@
+/* Shared styles for the Profile, Notifications and Admin user-management pages. All classes start with acc-. */
+.acc-page { max-width: 760px; margin: 0 auto; padding: 24px 16px; font-family: system-ui, sans-serif; color: #1f2937; }
+.acc-page.acc-wide { max-width: 1000px; }
+.acc-title { font-size: 1.5rem; font-weight: 600; margin: 0 0 16px; }
+.acc-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px 20px; }
+.acc-row { display: grid; grid-template-columns: 200px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+.acc-row:last-child { border-bottom: 0; }
+.acc-label { color: #6b7280; font-size: .875rem; }
+.acc-muted { color: #6b7280; }
+.acc-error { color: #b91c1c; font-size: .875rem; margin: 0 0 12px; }
+.acc-ok { color: #047857; font-size: .875rem; margin: 0 0 12px; }
+.acc-btn { border: 0; border-radius: 6px; padding: 6px 12px; font-size: .8125rem; font-weight: 500; color: #fff; background: #2563eb; cursor: pointer; }
+.acc-btn:disabled { opacity: .5; cursor: not-allowed; }
+.acc-btn.acc-danger { background: #dc2626; }
+.acc-btn.acc-success { background: #059669; }
+.acc-btn.acc-dark { background: #111827; }
+.acc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.acc-note { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; border: 1px solid #e5e7eb; background: #fff; border-radius: 8px; padding: 14px 16px; }
+.acc-note.acc-unread { background: #eff6ff; border-color: #bfdbfe; }
+.acc-note-text { margin: 0; font-size: .9rem; }
+.acc-unread .acc-note-text { font-weight: 600; }
+.acc-note-time { margin: 4px 0 0; font-size: .75rem; color: #9ca3af; }
+.acc-badge { display: inline-block; border-radius: 999px; padding: 2px 8px; font-size: .75rem; font-weight: 500; }
+.acc-badge.acc-active { background: #d1fae5; color: #065f46; }
+.acc-badge.acc-deactivated { background: #fee2e2; color: #991b1b; }
+.acc-count { margin-left: 8px; background: #2563eb; color: #fff; border-radius: 999px; padding: 2px 8px; font-size: .75rem; vertical-align: middle; }
+.acc-search { display: flex; gap: 8px; margin-bottom: 16px; }
+.acc-search input { flex: 1; max-width: 360px; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 10px; font-size: .875rem; }
+.acc-table-wrap { overflow-x: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+.acc-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.acc-table th { text-align: left; padding: 10px 14px; background: #f9fafb; color: #6b7280; font-size: .75rem; text-transform: uppercase; }
+.acc-table td { padding: 10px 14px; border-top: 1px solid #f3f4f6; }
+.acc-table .acc-right { text-align: right; }
+@media (max-width: 560px) { .acc-row { grid-template-columns: 1fr; gap: 2px; } }

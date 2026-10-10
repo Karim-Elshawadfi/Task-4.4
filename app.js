@@ -35,6 +35,10 @@ function createApp({ secret = process.env.JWT_SECRET, origin = process.env.APP_O
   // Person 4 (Req 11-15, 57, 58, 61): advisor management and scheduling preferences.
   app.use('/api/advisors', require('./routes/advisorRoutes'));
   app.use('/api/academic', require('./routes/academicRoutes'));
+  // Person 2 (Req 4, 5, 10): own profile, in-app notifications, administrator account status.
+  app.use('/api/users', require('./routes/profileRoutes'));
+  app.use('/api/notifications', require('./routes/notificationRoutes'));
+  app.use('/api/admin', require('./routes/adminRoutes'));
   app.use(express.static(path.join(__dirname, 'public')));
   app.use((error, req, res, next) => {
     if (error.type === 'entity.parse.failed') return res.status(400).json({ message: 'Invalid JSON.' });
