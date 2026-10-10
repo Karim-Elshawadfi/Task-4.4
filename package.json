@@ -1,23 +1,24 @@
 {
-  "name": "server",
+  "name": "guc-authentication-access",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "dev": "node --watch server.js",
-    "start": "node server.js",
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
     "test": "node --test tests/*.test.js",
-    "seed": "node seed/seedStudents.js"
+    "seed": "node --env-file-if-exists=.env seed/seedStudents.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.0.0",
+    "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.11.1"
+    "mongoose": "^9.11.1",
+    "nodemailer": "^10.0.16"
   },
   "devDependencies": {
     "mongodb-memory-server": "^11.3.0",

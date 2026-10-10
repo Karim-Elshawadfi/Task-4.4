@@ -1,21 +1,12 @@
-// Local dev server for Req 6-9. In the team repo, mount studentRoutes in your
-// existing server.js and use the Req 1 login for tokens.
-// Run: npm run dev   (needs MongoDB running; seed it with `npm run seed`)
-const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
+const { createApp } = require('./app');
 
-process.env.JWT_SECRET ||= 'dev-secret';
-const PORT = process.env.PORT || 5050;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/guc_schedule';
+async function start() {
+  const app = createApp();
+  const port = Number(process.env.PORT || 5050);
+  await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/guc_schedule');
+  await Promise.all(['./models/User', './models/AuthSession', './models/PasswordReset'].map(p => require(p).init()));
+  app.listen(port, () => console.log(`Authentication running at ${app.locals.auth.origin}`));
+}
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.use('/api/students', require('./routes/studentRoutes'));
-
-mongoose
-  .connect(MONGO_URI)
-  .then(() => app.listen(PORT, () => console.log(`API on http://localhost:${PORT} (db: ${MONGO_URI})`)))
-  .catch((e) => { console.error('MongoDB connection failed:', e.message); process.exit(1); });
+start().catch(error => { console.error('Unable to start authentication:', error.message); process.exitCode = 1; });

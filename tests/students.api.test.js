@@ -2,19 +2,29 @@
 // Run: node --test tests/
 const test = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const request = require('supertest');
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const { createApp } = require('../app');
 const User = require('../models/User');
+const AuthSession = require('../models/AuthSession');
+const { hashCode } = require('../services/authSecurity');
 const StudentProfile = require('../models/StudentProfile');
 const WorkflowAction = require('../models/WorkflowAction');
 const { recordWorkflowAction } = require('../services/workflowStatus');
 
-process.env.JWT_SECRET = 'test-secret';
-const app = express().use('/api/students', require('../routes/studentRoutes'));
-const auth = (user) => ({ Authorization: `Bearer ${jwt.sign({ id: user._id }, process.env.JWT_SECRET)}` });
+const secret = 'students-test-secret-32-characters-minimum';
+const app = createApp({ secret, sendResetEmail: async () => {} });
+// Mint a token the same way POST /api/auth/login does, so `protect` accepts it.
+const tokens = new Map();
+const signIn = async (user) => {
+  const session = await AuthSession.create({ user_id: user._id,
+    credential_hash: hashCode(user._id, user.password_hash, secret), expires_at: new Date(Date.now() + 3600e3) });
+  tokens.set(user._id, jwt.sign({ id: user._id }, secret,
+    { algorithm: 'HS256', jwtid: session._id, expiresIn: '1h', issuer: 'guc-scheduling', audience: 'guc-scheduling' }));
+};
+const auth = (user) => ({ Authorization: `Bearer ${tokens.get(user._id)}` });
 
 let mongo, coordinator, advisor, omar, nour, laila;
 
@@ -24,6 +34,7 @@ test.before(async () => {
   const base = { password_hash: 'x' };
   coordinator = await User.create({ ...base, full_name: 'Rania Lotfy', guc_email: 'coordinator@guc.edu.eg', role: 'COORDINATOR' });
   advisor = await User.create({ ...base, full_name: 'Amr Hassan', guc_email: 'amr.hassan@guc.edu.eg', role: 'ADVISOR' });
+  await Promise.all([signIn(coordinator), signIn(advisor)]);
 
   const student = async (full_name, profile, account_status = 'ACTIVE') => {
     const u = await User.create({ ...base, full_name, account_status, guc_email: `${full_name.toLowerCase().replace(' ', '.')}@student.guc.edu.eg`, role: 'STUDENT' });
