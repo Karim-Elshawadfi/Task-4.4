@@ -3,14 +3,17 @@ const helmet = require('helmet');
 const path = require('node:path');
 const { createAuthRoutes } = require('./routes/authRoutes');
 const { createResetMailer } = require('./services/resetMailer');
+const { createAdvisorMailer } = require('./services/notificationService');
 
 function createApp({ secret = process.env.JWT_SECRET, origin = process.env.APP_ORIGIN || 'http://localhost:5050',
-  production = process.env.NODE_ENV === 'production', sendResetEmail = createResetMailer() } = {}) {
+  production = process.env.NODE_ENV === 'production', sendResetEmail = createResetMailer(),
+  sendAdvisorEmail = createAdvisorMailer() } = {}) {
   if (typeof secret !== 'string' || secret.length < 32) throw new Error('JWT_SECRET must contain at least 32 characters.');
   const allowedOrigin = new URL(origin).origin;
   if (production && !allowedOrigin.startsWith('https://')) throw new Error('Production APP_ORIGIN must use HTTPS.');
   const app = express();
   app.locals.auth = { secret, origin: allowedOrigin, production, sendResetEmail };
+  app.locals.advising = { sendAdvisorEmail }; // Req 13 (Person 4)
   app.use(helmet({ strictTransportSecurity: production ? undefined : false,
     contentSecurityPolicy: { directives: { 'upgrade-insecure-requests': production ? [] : null } } }));
   // Person 5 (Req 16-21, 128): academic terms and course catalogue. Mounted before the 8kb JSON
@@ -29,6 +32,9 @@ function createApp({ secret = process.env.JWT_SECRET, origin = process.env.APP_O
     next();
   }, createAuthRoutes());
   app.use('/api/students', require('./routes/studentRoutes'));
+  // Person 4 (Req 11-15, 57, 58, 61): advisor management and scheduling preferences.
+  app.use('/api/advisors', require('./routes/advisorRoutes'));
+  app.use('/api/academic', require('./routes/academicRoutes'));
   app.use(express.static(path.join(__dirname, 'public')));
   app.use((error, req, res, next) => {
     if (error.type === 'entity.parse.failed') return res.status(400).json({ message: 'Invalid JSON.' });

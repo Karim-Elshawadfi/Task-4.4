@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema(
     full_name: { type: String, required: true, trim: true },
     role: { type: String, enum: ROLES, required: true },
     account_status: { type: String, enum: ACCOUNT_STATUSES, default: 'ACTIVE' },
+    // Req 11-12 (Person 4): whether an ADVISOR is currently part of the advising system. Removing an
+    // advisor sets this to false; it never deactivates the account (that is Req 10) or deletes history.
+    advising_active: { type: Boolean, default: true },
   },
   { collection: 'users', timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
