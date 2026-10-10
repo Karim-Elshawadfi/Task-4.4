@@ -1,13 +1,10 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
-import Profile from './components/Profile';
-import Notifications from './components/Notifications';
-import AdminUserManagement from './components/AdminUserManagement';
+//[req5] import Notifications from './components/Notifications';
+//[req10] import AdminUserManagement from './components/AdminUserManagement';
 
-// Each requirement's commit un-comments its own line.
 const routes = [
-  { path: '/profile', element: <Profile /> },
-  { path: '/notifications', element: <Notifications /> },
-  { path: '/admin/users', element: <AdminUserManagement /> },
+  //[req5] { path: '/notifications', element: <Notifications /> },
+  //[req10] { path: '/admin/users', element: <AdminUserManagement /> },
 ];
 
 export default function App() {
