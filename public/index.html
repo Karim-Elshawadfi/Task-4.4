@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GUC • Sign in</title>
+  <link rel="stylesheet" href="/auth.css">
+  <script src="/auth.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <aside class="intro">
+      <a class="brand" href="/" aria-label="GUC scheduling home"><span class="mark">G</span> GUC <span class="brand-detail">Scheduling & advising</span></a>
+      <div class="intro-body"><p class="eyebrow">YOUR UNIVERSITY, CONNECTED</p><h1>A clearer path<br>through your semester.</h1><p>One place for your schedule, academic records, and advising.</p></div>
+      <p class="intro-footer">German University in Cairo</p>
+    </aside>
+    <section class="panel" aria-label="Account access">
+      <p class="eyebrow">ACCOUNT ACCESS</p>
+      <div id="login-view">
+        <h2>Welcome back.</h2><p class="description">Sign in with your existing GUC account.</p>
+        <form id="login-form">
+          <label for="email">GUC email</label><input id="email" name="email" type="email" autocomplete="username" placeholder="you@student.guc.edu.eg" maxlength="254" required>
+          <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required>
+          <button class="primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
+        </form>
+        <button class="link" id="forgot-link" type="button">Forgot your password?</button>
+        <p class="note">Accounts are provided by the university. Contact your administrator if you need access.</p>
+      </div>
+      <div id="forgot-view" hidden>
+        <h2>Reset your password.</h2><p class="description">We’ll send a one-time code to your GUC email.</p>
+        <form id="forgot-form"><label for="reset-email">GUC email</label><input id="reset-email" name="email" type="email" autocomplete="username" maxlength="254" required><button class="primary" type="submit">Send reset code <span aria-hidden="true">→</span></button></form>
+        <button class="link" id="have-code" type="button">I already have a code</button><button class="link back-login" type="button">Back to sign in</button>
+      </div>
+      <div id="reset-view" hidden>
+        <h2>Choose a new password.</h2><p class="description">Enter the code from your email. It expires after 10 minutes.</p>
+        <form id="reset-form">
+          <label for="verify-email">GUC email</label><input id="verify-email" name="email" type="email" autocomplete="username" maxlength="254" required>
+          <label for="code">Six-digit code</label><input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
+          <label for="new-password">New password</label><input id="new-password" name="newPassword" type="password" autocomplete="new-password" minlength="12" aria-describedby="password-help" required>
+          <p id="password-help" class="help">At least 12 characters; at most 72 UTF-8 bytes.</p>
+          <label for="confirm-password">Confirm password</label><input id="confirm-password" type="password" autocomplete="new-password" minlength="12" required>
+          <button class="primary" type="submit">Reset password <span aria-hidden="true">→</span></button>
+        </form><button class="link back-login" type="button">Back to sign in</button>
+      </div>
+      <div id="account-view" hidden>
+        <span class="status">SIGNED IN</span><h2 id="welcome-name">Welcome.</h2><p class="description">Your account is ready.</p>
+        <dl><dt>GUC email</dt><dd id="account-email"></dd><dt>Role</dt><dd id="account-role"></dd></dl>
+        <button class="primary" id="logout" type="button">Log out <span aria-hidden="true">→</span></button>
+      </div>
+      <p id="message" role="status" aria-live="polite" tabindex="-1" hidden></p>
+      <p class="panel-footer">University scheduling & advising</p>
+    </section>
+  </main>
+</body>
+</html>
