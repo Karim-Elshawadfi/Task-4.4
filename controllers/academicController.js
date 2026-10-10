@@ -80,14 +80,12 @@ async function getMyPreferences(req, res) {
   res.json(present(await loadPreferences(profile._id)));
 }
 
-// A Coordinator may open any advising student; an Advisor only the students assigned to them.
+// Any Advisor or Coordinator may open any advising student, including students assigned to another
+// Advisor (the same rule as the advisor student directory, Req 50-53, that Req 58 and 61 depend on).
 async function loadViewableStudent(req) {
   const profile = await StudentProfile.findById(req.params.studentId).lean();
   if (!profile) throw new HttpError(404, 'Student not found.');
   if (profile.student_type !== 'ADVISING') throw new HttpError(400, 'This is not an Advising Student.');
-  if (req.user.role === 'ADVISOR' && profile.assigned_advisor_id !== req.user._id) {
-    throw new HttpError(403, 'This student is not assigned to you.');
-  }
   return profile;
 }
 
@@ -99,10 +97,12 @@ async function getStudentPreferences(req, res) {
 }
 
 // Req 61 — failed and unattended courses; mandatory unless an approved removal applies.
+// A course the student has since passed (a COMPLETED record) is no longer outstanding.
 async function getFailedAndUnattended(req, res) {
   const profile = await loadViewableStudent(req);
-  const rows = await AcademicRecord.find({ student_id: profile._id, status: { $in: ['FAILED', 'UNATTENDED'] } })
-    .sort({ academic_year: 1, course_code: 1 }).lean();
+  const records = await AcademicRecord.find({ student_id: profile._id }).sort({ academic_year: 1, course_code: 1 }).lean();
+  const passed = new Set(records.filter((r) => r.status === 'COMPLETED').map((r) => r.course_code));
+  const rows = records.filter((r) => r.status !== 'COMPLETED' && !passed.has(r.course_code));
   res.json({
     student_id: profile._id,
     courses: rows.map((r) => ({ course_code: r.course_code, status: r.status, grade: r.grade ?? null,

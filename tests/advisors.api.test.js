@@ -248,7 +248,7 @@ test('Req 57: only Advising Students, and only before the advising deadline', as
 });
 
 // ---------------------------------------------------------------- Req 58
-test('Req 58: advisor (assigned students) and coordinator see preferences in priority order with the update time', async () => {
+test('Req 58: any advisor and the coordinator see preferences in priority order with the update time', async () => {
   await put(mona, [{ type: 'AVOIDED_DAY', value: 'Tuesday', priority: 2 }, { type: 'DAY_OFF', value: 'Saturday', priority: 1 }]).expect(200);
   const view = (user, id) => request(app).get(`/api/academic/preferences/${id}`).set(as(user));
 
@@ -259,7 +259,8 @@ test('Req 58: advisor (assigned students) and coordinator see preferences in pri
 
   await StudentProfile.updateOne({ _id: mona._id }, { $set: { assigned_advisor_id: amr._id } });
   assert.equal((await view(amr, mona._id).expect(200)).body.preferences.length, 2);
-  await view(sara, mona._id).expect(403); // sara is not Mona's advisor
+  assert.equal((await view(sara, mona._id).expect(200)).body.preferences.length, 2); // any Advisor may open any advising student
+  await view(mona, mona._id).expect(403); // students use their own route instead
   await view(amr, laila._id).expect(400); // Normal Student
   await view(coordinator, 'no-such-student').expect(404);
 });
@@ -282,7 +283,19 @@ test('Req 61: failed and unattended courses are listed as mandatory unless a rem
   assert.deepEqual(body.courses.map((c) => [c.course_code, c.status, c.mandatory]), [
     ['PHYS 101', 'FAILED', false], ['CSEN 301', 'FAILED', true], ['MATH 201', 'UNATTENDED', true],
   ]);
-  await get(sara, mona._id).expect(403);
+  assert.equal((await get(sara, mona._id).expect(200)).body.courses.length, 3); // any Advisor, not only the assigned one
   await get(mona, mona._id).expect(403); // students cannot use this route
   assert.deepEqual((await get(coordinator, nour._id).expect(200)).body.courses, []);
+});
+
+test('Req 61: a failed or unattended course that the student later passed is no longer listed', async () => {
+  await AcademicRecord.create([
+    { student_id: nour._id, course_code: 'CSEN 401', grade: 'F', academic_year: '2024/2025', status: 'FAILED' },
+    { student_id: nour._id, course_code: 'CSEN 401', grade: 'B', academic_year: '2025/2026', status: 'COMPLETED' }, // retaken and passed
+    { student_id: nour._id, course_code: 'MATH 301', academic_year: '2024/2025', status: 'UNATTENDED' },
+    { student_id: nour._id, course_code: 'MATH 301', grade: 'C', academic_year: '2025/2026', status: 'COMPLETED' }, // attended later
+    { student_id: nour._id, course_code: 'DMET 501', grade: 'F', academic_year: '2025/2026', status: 'FAILED' }, // still outstanding
+  ]);
+  const { body } = await request(app).get(`/api/academic/failed-unattended/${nour._id}`).set(as(coordinator)).expect(200);
+  assert.deepEqual(body.courses.map((c) => [c.course_code, c.status, c.mandatory]), [['DMET 501', 'FAILED', true]]);
 });
