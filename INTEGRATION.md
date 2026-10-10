@@ -26,8 +26,9 @@ These are **not stored**. They are calculated when you read them:
 Paths are from the repo root:
 - `services/workflowStatus.js`, `models/WorkflowAction.js`, `controllers/studentController.js`, `routes/studentRoutes.js`
 - `models/User.js`, `models/StudentProfile.js`: if Person 1/2 already has these, **keep theirs**. They follow the unified schema, so nothing needs to change.
-- `middleware/auth.js`: use your Req 1 auth middleware if you have one. Only `requireRole` is new.
-- In `server.js`: `app.use('/api/students', require('./routes/studentRoutes'));`
+- `middleware/auth.js` is the Req 1 auth middleware (see `INTEGRATION-AUTH.md`). The student routes use its `protect` and `requireRole`, so get a token from `POST /api/auth/login` (cookie or `Authorization: Bearer`).
+- `app.js` mounts the routes: `app.use('/api/students', require('./routes/studentRoutes'));`
+- Run: set `JWT_SECRET` (at least 32 characters) in `.env` (see `.env.example`), then `npm run dev`
 - Seed: `MONGO_URI=... npm run seed`
 
 ## How the workflow status works (the PM may ask)
@@ -37,8 +38,8 @@ Later features (drafting, approval, swaps…) must call `recordWorkflowAction(st
 If a profile has no `workflow_status` yet, it shows as `Not Started` (ADVISING) or `Schedule Assigned` (NORMAL).
 
 ## Tests
-`npm test` runs 17 tests:
+`npm test` runs 17 student tests (plus the auth tests in `tests/auth.test.js`):
 - unit tests for status calculation, search (including regex escaping), all 8 filters and sort whitelisting
-- end-to-end API tests against an in-memory MongoDB (joins, filters, pagination, details, 403/404/400)
+- end-to-end API tests against an in-memory MongoDB (joins, filters, pagination, details, 403/404/400), using real login sessions
 
 Seed logins: `coordinator@guc.edu.eg` / `admin@guc.edu.eg`, password `Password123!`
