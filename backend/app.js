@@ -10,7 +10,6 @@ app.use(express.json());
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // Authentication (Req 1) is handled separately and must set req.user = { user_id } before these routes.
-//[req5] app.use('/api/notifications', require('./routes/notificationRoutes'));  // Req 5
 //[req10] app.use('/api/admin', require('./routes/adminRoutes'));                 // Req 10
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found.' }));

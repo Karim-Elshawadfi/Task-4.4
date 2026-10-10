@@ -1,9 +1,7 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
-//[req5] import Notifications from './components/Notifications';
 //[req10] import AdminUserManagement from './components/AdminUserManagement';
 
 const routes = [
-  //[req5] { path: '/notifications', element: <Notifications /> },
   //[req10] { path: '/admin/users', element: <AdminUserManagement /> },
 ];
 
