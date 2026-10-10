@@ -1,8 +1,7 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
-//[req10] import AdminUserManagement from './components/AdminUserManagement';
+
 
 const routes = [
-  //[req10] { path: '/admin/users', element: <AdminUserManagement /> },
 ];
 
 export default function App() {
