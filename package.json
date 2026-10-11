@@ -9,6 +9,7 @@
     "seed": "node --env-file-if-exists=.env seed/seedStudents.js",
     "mongo": "node scripts/devMongo.js",
     "seed:catalogue": "node --env-file-if-exists=.env seed/seedCatalogue.js",
+    "seed:all": "node --env-file-if-exists=.env seed/seedAll.js",
     "test:catalogue": "node --test tests/catalogue.unit.test.js tests/catalogue.api.test.js",
     "smoke:catalogue": "node --env-file-if-exists=.env scripts/smokeCatalogue.js",
     "setup:env": "node scripts/makeEnv.js"
