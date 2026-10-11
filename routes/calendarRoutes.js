@@ -3,8 +3,7 @@ const router = express.Router();
 const calendarController = require('../controllers/calendarController');
 const { protect } = require('../middleware/auth');
 
-router.get('/', protect, calendarController.getCalendar);
-router.post('/add', protect, calendarController.addEvent);
-router.delete('/remove/:eventId', protect, calendarController.removeEvent);
+router.get('/weekly', protect, calendarController.getWeeklyCalendar);
+router.get('/courses', protect, calendarController.getRegisteredCourses);
 
 module.exports = router;

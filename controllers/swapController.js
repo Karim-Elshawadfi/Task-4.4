@@ -11,6 +11,7 @@ exports.requestSwap = async (req, res, next) => {
             return next(new HttpError(400, 'You cannot swap with yourself'));
         }
 
+        // Logic from P6: Atomic swap using Scheduling Transaction
         await withSchedulingTransaction(async (session) => {
             const myAssignment = await GroupAssignment.findOne({ student_id: studentId, course_id: courseId }).session(session);
             const targetAssignment = await GroupAssignment.findOne({ student_id: targetStudentId, course_id: courseId }).session(session);
@@ -19,11 +20,12 @@ exports.requestSwap = async (req, res, next) => {
                 throw new HttpError(404, 'One or both students are not assigned to this course');
             }
 
-            if (myAssignment.study_group.equals(targetAssignment.study_group)) {
+            if (myAssignment.study_group === targetAssignment.study_group) {
                 throw new HttpError(400, 'Both students are already in the same group');
             }
 
-            // P6 Logic: Atomic swap of study groups
+            // In a real P6 implementation, we would call a service like changeSeats() 
+            // to handle the actual movement and capacity checks.
             const oldGroup = myAssignment.study_group;
             const newGroup = targetAssignment.study_group;
 

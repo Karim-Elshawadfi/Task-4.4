@@ -16,18 +16,24 @@ exports.getBalance = async (req, res, next) => {
 exports.spendFunds = async (req, res, next) => {
     try {
         const { amount, description } = req.body;
-        if (!amount || amount <= 0) {
-            return next(new HttpError(400, 'Please provide a valid amount to spend'));
+        if (!Number.isInteger(amount) || amount <= 0) {
+            return next(new HttpError(400, 'Please provide a positive integer amount in piastres'));
         }
 
-        const wallet = await Wallet.findOne({ student_id: req.user._id });
-        if (!wallet || wallet.balance < amount) {
-            return next(new HttpError(400, 'Insufficient funds'));
+        // Atomic update to prevent overspending
+        const wallet = await Wallet.findOneAndUpdate(
+            { student_id: req.user._id, balance: { $gte: amount } },
+            { 
+                $inc: { balance: -amount },
+                $push: { transactions: { type: 'DEBIT', amount, description, timestamp: new Date() } }
+            },
+            { new: true }
+        );
+
+        if (!wallet) {
+            return next(new HttpError(400, 'Insufficient funds or wallet not found'));
         }
 
-        wallet.balance -= amount;
-        wallet.transactions.push({ type: 'DEBIT', amount, description, timestamp: new Date() });
-        await wallet.save();
         res.status(200).json({ message: 'Payment successful', balance: wallet.balance });
     } catch (err) {
         next(err);
