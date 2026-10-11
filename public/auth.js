@@ -28,6 +28,7 @@ async function api(endpoint, payload) {
 }
 
 function account(user) {
+  $('offerings-link').hidden = !['ADMIN', 'COORDINATOR', 'ADVISOR'].includes(user.role);
   $('welcome-name').textContent = `Welcome, ${user.full_name}.`;
   $('account-email').textContent = user.guc_email;
   $('account-role').textContent = { STUDENT: 'Student', ADVISOR: 'Advisor', COORDINATOR: 'Coordinator', ADMIN: 'Administrator' }[user.role] || user.role;

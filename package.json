@@ -12,7 +12,11 @@
     "seed:all": "node --env-file-if-exists=.env seed/seedAll.js",
     "test:catalogue": "node --test tests/catalogue.unit.test.js tests/catalogue.api.test.js",
     "smoke:catalogue": "node --env-file-if-exists=.env scripts/smokeCatalogue.js",
-    "setup:env": "node scripts/makeEnv.js"
+    "setup:env": "node scripts/makeEnv.js",
+    "seed:offerings": "node --env-file-if-exists=.env seed/seedOfferings.js",
+    "test:offerings": "node --test tests/offerings.unit.test.js tests/offerings.api.test.js tests/offerings.page.test.js tests/offerings.regressions.test.js",
+    "smoke:offerings": "node --env-file-if-exists=.env scripts/smokeOfferings.js",
+    "demo": "node scripts/demo.js"
   },
   "engines": {
     "node": ">=22"
@@ -29,9 +33,15 @@
   "devDependencies": {
     "mingo": "^7.2.4",
     "mongodb-memory-server": "^11.3.0",
-    "supertest": "^7.3.1"
+    "supertest": "^7.3.1",
+    "jsdom": "^30.1.2"
   },
   "allowScripts": {
     "mongodb-memory-server@11.3.0": true
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "disablePostinstall": true
+    }
   }
 }

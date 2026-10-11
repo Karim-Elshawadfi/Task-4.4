@@ -20,6 +20,9 @@ function createApp({ secret = process.env.JWT_SECRET, origin = process.env.APP_O
   // parser so a catalogue CSV import (sent as JSON text) can be up to 2 MB.
   app.use('/api/terms', express.json({ limit: '100kb' }), require('./routes/termRoutes'));
   app.use('/api/catalogue', express.json({ limit: '2mb' }), require('./routes/catalogueRoutes'));
+  // P6 (Yehia El Shayeb, 58-6588): offerings and standard schedule templates.
+  app.use('/api/offerings', express.json({ limit: '200kb' }), require('./routes/offeringRoutes'));
+  app.use('/api/templates', express.json({ limit: '200kb' }), require('./routes/templateRoutes'));
   app.use(express.json({ limit: '8kb' }));
   app.use('/api/auth', (req, res, next) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
