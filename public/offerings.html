@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GUC • Course offerings and standard schedules</title>
+  <link rel="stylesheet" href="/offerings.css">
+  <script src="/offerings.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Course offerings &amp; standard schedules</h1>
+    <p class="muted small">Plan what each course runs in a term, then build the weekly schedule every study group follows.</p>
+  </div>
+  <div class="who">
+    <span id="who" class="muted small">Checking your session…</span>
+    <button class="btn ghost small" id="session-action" type="button" hidden></button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab on" data-tab="offerings" type="button">Course offerings</button>
+  <button class="tab" data-tab="templates" type="button">Standard schedules</button>
+</nav>
+
+<div id="flash"></div>
+
+<main>
+  <!-- ---------------------------------------------------------- Req 22-27 -->
+  <section id="tab-offerings">
+    <div class="bar">
+      <label>Academic term <select id="o-term"></select></label>
+      <label class="grow">Search <input id="o-search" placeholder="Course code, name or instructor"></label>
+      <label>Major <select id="o-major"><option value="">All</option></select></label>
+      <label>Semester <select id="o-semester"><option value="">All</option></select></label>
+      <label>Status
+        <select id="o-published">
+          <option value="">All</option><option value="true">Published</option><option value="false">Draft</option>
+        </select>
+      </label>
+    </div>
+    <div id="o-role-note"></div>
+    <div class="stats" id="o-stats"></div>
+
+    <div class="bar">
+      <button class="btn" id="o-new" type="button">+ New offering</button>
+      <button class="btn ghost small" id="o-publish-all" type="button">Publish all in this term</button>
+      <button class="btn ghost small" id="o-unpublish-all" type="button">Unpublish all</button>
+      <span class="muted small" id="o-count"></span>
+    </div>
+
+    <form id="o-form" class="card" hidden>
+      <h3 id="o-form-title">New course offering</h3>
+      <div class="grid">
+        <label>Course <select id="f-course"></select></label>
+        <label class="span2">Instructor(s) <input id="f-instructors" placeholder="Dr. Amr Hassan, Dr. Mona Adel"></label>
+      </div>
+      <fieldset>
+        <legend>Eligible major and semester groups</legend>
+        <div id="f-eligible" class="chips"></div>
+      </fieldset>
+      <h4>Lecture, tutorial and lab groups</h4>
+      <div class="scroll"><table class="table"><thead><tr>
+        <th>Type</th><th>Group</th><th>Day</th><th>Start</th><th>End</th><th>Room</th><th>Capacity</th><th>Seated</th><th></th>
+      </tr></thead><tbody id="f-slots"></tbody></table></div>
+      <div class="bar">
+        <button class="btn ghost small" id="f-add-slot" type="button">+ Add a group</button>
+      </div>
+      <div class="bar right">
+        <button class="btn ghost" id="f-cancel" type="button">Cancel</button>
+        <button class="btn" type="submit">Save</button>
+      </div>
+    </form>
+
+    <div class="scroll"><table class="table click"><thead><tr>
+      <th>Course</th><th>Instructor(s)</th><th>Eligible</th><th>Groups</th><th>Seats</th><th>Status</th><th></th>
+    </tr></thead><tbody id="o-rows"></tbody></table></div>
+
+    <div id="o-details"></div>
+  </section>
+
+  <!-- ---------------------------------------------------------- Req 28-30 -->
+  <section id="tab-templates" hidden>
+    <div class="bar">
+      <label>Academic term <select id="t-term"></select></label>
+      <label>Major <select id="t-major"><option value="">All</option></select></label>
+      <label>Semester <select id="t-semester"><option value="">All</option></select></label>
+      <button class="btn" id="t-new" type="button">+ New standard schedule</button>
+    </div>
+    <div id="t-role-note"></div>
+
+    <form id="t-form" class="card" hidden>
+      <h3 id="t-form-title">New standard schedule</h3>
+      <div class="grid">
+        <label>Major <select id="tf-major"></select></label>
+        <label>Semester <select id="tf-semester"></select></label>
+        <label>Study group <input id="tf-group" placeholder="1"></label>
+      </div>
+      <h4>Courses and groups</h4>
+      <p class="muted small">Tick the groups this study group attends. The week below updates as you tick,
+        so a clash is visible before you save.</p>
+      <div id="tf-preview"></div>
+      <div id="tf-picker"></div>
+      <div class="bar right">
+        <button class="btn ghost" id="tf-cancel" type="button">Cancel</button>
+        <button class="btn" type="submit">Save</button>
+      </div>
+    </form>
+
+    <div class="scroll"><table class="table click"><thead><tr>
+      <th>Group</th><th>Courses</th><th>Slots</th><th>Students</th><th>Status</th><th></th>
+    </tr></thead><tbody id="t-rows"></tbody></table></div>
+
+    <div id="t-details"></div>
+  </section>
+</main>
+</body>
+</html>

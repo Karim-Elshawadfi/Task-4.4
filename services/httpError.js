@@ -9,7 +9,7 @@ class HttpError extends Error {
 // Express error handler for the terms/catalogue routes: keeps status codes and field errors.
 // eslint-disable-next-line no-unused-vars
 function handleErrors(err, req, res, next) {
-  if (err.status && err.status < 500) {
+  if (err.status && (err.status < 500 || err instanceof HttpError)) {
     const { status, message, errors } = err;
     return res.status(status).json({ message, ...(errors ? { errors } : {}) });
   }
